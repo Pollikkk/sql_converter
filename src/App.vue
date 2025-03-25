@@ -1,26 +1,41 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div class="app-container">
+    <!-- Боковая панель -->
+    <SidePanel @drag-start="handleDragStart" />
+
+    <!-- Основное поле для рисования -->
+    <MainCanvas @drop="handleDrop" :items="canvasItems" />
+  </div>
 </template>
 
-<script>
-import HelloWorld from './components/HelloWorld.vue'
+<script setup>
+  import { ref } from 'vue'
+  import SidePanel from './components/SidePanel.vue'
+  import MainCanvas from './components/MainCanvas.vue'
 
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
+  const canvasItems = ref([])
+
+  // Обработчик начала перетаскивания
+  const handleDragStart = (event, type) => {
+    event.dataTransfer.setData('itemType', type)
   }
-}
+
+  // Обработчик дропа
+  const handleDrop = (event) => {
+    const type = event.dataTransfer.getData('itemType')
+    const x = event.clientX
+    const y = event.clientY
+
+    canvasItems.value.push({ id: Date.now(), type, x, y })
+  }
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+<style lang="scss">
+  #app {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+  }
+  .app-container {
+    display: flex;
+    height: 95vh;
+  }
 </style>

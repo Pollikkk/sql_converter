@@ -1,0 +1,13 @@
+$light-grey: #c7c7c7;
+
+* {
+    margin: 0;
+    padding: 0;
+    border: 0; 
+    box-sizing: border-box;
+}
+
+body{
+  background-color: $light-grey;
+  padding: 10px;
+}
