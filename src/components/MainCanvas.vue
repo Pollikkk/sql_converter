@@ -4,10 +4,10 @@
     <svg class="relations">
       <g v-for="(relation, index) in store.relations" :key="index">
         <line
-          :x1="getConnectionPoint(relation.from, getElement(relation.to)?.x, getElement(relation.to)?.y).x"
-          :y1="getConnectionPoint(relation.from, getElement(relation.to)?.x, getElement(relation.to)?.y).y"
-          :x2="getConnectionPoint(relation.to, getElement(relation.from)?.x, getElement(relation.from)?.y).x"
-          :y2="getConnectionPoint(relation.to, getElement(relation.from)?.x, getElement(relation.from)?.y).y"
+          :x1="getConnectionPoint(relation.from).centerX"
+          :y1="getConnectionPoint(relation.from).centerY"
+          :x2="getConnectionPoint(relation.to).centerX"
+          :y2="getConnectionPoint(relation.to).centerY"
           stroke="black"
           stroke-width="2"
           class="relation-line"
@@ -149,22 +149,58 @@
   };
 
   // Функция для поиска элемента по id
-  const getElement = (id) => store.elements.find(e => e.id === id);
+  //const getElement = (id) => store.elements.find(e => e.id === id);
 
   const getMidX = (index) => {
     const relation = store.relations[index];
-    const from = getElement(relation.from);
-    const to = getElement(relation.to);
-    return from && to ? (from.x + to.x) / 2 + 75 : 0;
+
+    const tableFrom = document.querySelector(`[data-id="${relation.from}"]`);
+    if (!tableFrom) return { x: 0, y: 0 };
+    const rectFrom = tableFrom.getBoundingClientRect();
+    const centerXFrom = rectFrom.x;
+
+    const tableTo = document.querySelector(`[data-id="${relation.to}"]`);
+    if (!tableTo) return { x: 0, y: 0 };
+    const rectTo = tableTo.getBoundingClientRect();
+    const centerXTo = rectTo.x;
+
+    return relation.from && relation.to ? (centerXFrom + centerXTo) / 2 : 0;
   };
   const getMidY = (index) => {
     const relation = store.relations[index];
-    const from = getElement(relation.from);
-    const to = getElement(relation.to);
-    return from && to ? (from.y + to.y) / 2 + 25 : 0;
+
+    const tableFrom = document.querySelector(`[data-id="${relation.from}"]`);
+    if (!tableFrom) return { x: 0, y: 0 };
+    const rectFrom = tableFrom.getBoundingClientRect();
+    const centerYFrom = rectFrom.y + rectFrom.height / 2;
+
+    const tableTo = document.querySelector(`[data-id="${relation.to}"]`);
+    if (!tableTo) return { x: 0, y: 0 };
+    const rectTo = tableTo.getBoundingClientRect();
+    const centerYTo = rectTo.y + rectTo.height / 2;
+
+    return relation.from && relation.to ? (centerYFrom + centerYTo) / 2 : 0;
   };
 
-  const getConnectionPoint = (tableId, targetX, targetY) => {
+  const getConnectionPoint = (tableId) => {
+    const table = document.querySelector(`[data-id="${tableId}"]`);
+    if (!table) return { x: 0, y: 0 };
+    const rect = table.getBoundingClientRect();
+    const centerX = rect.x;
+    console.log('rect.x: '+rect.x);
+    console.log('rect.width: ' + rect.width);
+    const centerY = rect.y + rect.height / 2;
+    console.log('rect.y: '+rect.x);
+    console.log('rect.height: ' + rect.height);
+    console.log(centerX);
+    console.log(centerY);
+    console.log('h '+rect.height);
+    console.log('w '+rect.width);
+
+    return { centerX,centerY };
+  }
+
+  /*const getConnectionPoint = (tableId, targetX, targetY) => {
     const table = document.querySelector(`[data-id="${tableId}"]`);
     if (!table) return { x: 0, y: 0 };
 
@@ -208,7 +244,7 @@
     }
 
     return { x, y };
-  };
+  };*/
 
 </script>
 

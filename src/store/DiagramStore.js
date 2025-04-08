@@ -103,8 +103,8 @@ export const useDiagramStore = defineStore("diagram", {
       })
 
       // Заменяем символы новой строки на <br>
-      this.sqlCode = sql_code.replace(/\n/g, '<br>');
-      //this.sqlCode = sql_code;
+      //this.sqlCode = sql_code.replace(/\n/g, '<br>');
+      this.sqlCode = sql_code;
       console.log(sql_code);
 
       this.relations.forEach((rel) => {
