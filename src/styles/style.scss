@@ -1,4 +1,5 @@
 $light-grey: #c7c7c7;
+$violet: #8e8191;
 
 * {
     margin: 0;
@@ -8,6 +9,6 @@ $light-grey: #c7c7c7;
 }
 
 body{
-  background-color: $light-grey;
+  background-color: $violet;
   padding: 10px;
 }

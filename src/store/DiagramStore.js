@@ -54,14 +54,18 @@ export const useDiagramStore = defineStore("diagram", {
         this.selectedElements.push(id);
       }
     },
-    addRelation() {
+    addRelation(type) {
       if (this.selectedElements.length === 2) {
+        const parts = type.split(':');
         this.relations.push({
           from: this.selectedElements[0],
           to: this.selectedElements[1],
+          fromType: parts[0],
+          toType: parts[1]
         });
         this.selectedElements = []; // Очистить выбор после создания связи
         console.log(this.relations);
+        console.log(type);
       }
     },
     removeRelation(index) {

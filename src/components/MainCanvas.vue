@@ -280,6 +280,8 @@
     border-radius: 5px;
     user-select: none;
     min-width: 200px;
+    max-width: 350px;
+    width: 250px;
   }
 
   .element.selected {
