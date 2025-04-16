@@ -3,6 +3,7 @@
     <div>Добавить таблицу</div>
     <button class="ordinary-button" @click="addElement('table')">Добавить таблицу</button>
     <div>Добавить связи</div>
+    <!--
     <button class="ordinary-button" @click="store.addRelation('M:M')" :disabled="store.selectedElements.length !== 2">
       М : М
     </button>
@@ -11,6 +12,16 @@
     </button>
     <button class="ordinary-button" @click="store.addRelation('1:M')" :disabled="store.selectedElements.length !== 2">
       1 : М
+    </button>
+    -->
+    <button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation">
+      {{ store.isAddingRelation ? 'Выход' : 'М : М' }}
+    </button>
+    <button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation">
+      {{ store.isAddingRelation ? 'Выход' : '1 : 1' }}
+    </button>
+    <button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation">
+      {{ store.isAddingRelation ? 'Выход' : '1 : М' }}
     </button>
     <button class="convert" @click="store.convertToSql(); isModalOpen = true">sql-код</button>
 

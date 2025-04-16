@@ -5,7 +5,9 @@ export const useDiagramStore = defineStore("diagram", {
     elements: [], // Таблицы
     relations: [], // Связи между таблицами
     selectedElements: [], // Выбранные элементы для связи
-    sqlCode: ""
+    sqlCode: "",
+    isAddingRelation: false,
+    relationStart: null,
   }),
   actions: {
     addElement(type) {
@@ -68,9 +70,45 @@ export const useDiagramStore = defineStore("diagram", {
         console.log(type);
       }
     },
+    getRelationSymbol(type) {
+      if (type === '1') return 'OneType';
+      if (type === '0..1') return 'OptionalOneType';
+      if (type === 'M') return 'ManyType';
+      return null;
+    },
     removeRelation(index) {
       this.relations.splice(index, 1);
     },
+
+    startRelation(tableId, anchor){
+      this.relationStart = { tableId, anchor };
+    },
+    finishRelation(tableId, anchor){
+      if (!this.relationStart) return;
+  
+      console.log("to: " +tableId);
+      console.log("toAnchor: " + anchor.name);
+      console.log("from: " + this.relationStart.tableId);
+      console.log("fromAnchor: " + this.relationStart.anchor.name);
+
+      this.relations.push({
+        from: this.relationStart.tableId,
+        fromAnchor: this.relationStart.anchor, // сохраняем имя/позицию
+        to: tableId,
+        toAnchor: anchor
+      });
+  
+      // Очистка после добавления
+      this.relationStart = null;
+      this.isAddingRelation = false;
+
+      console.log(this.relations);
+    },
+    cancelRelation(){
+      this.relationStart = null;
+      this.isAddingRelation = false;
+    },
+
     convertToSql(){
       //checkScheme();
 

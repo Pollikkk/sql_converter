@@ -4,15 +4,24 @@
     <svg class="relations">
       <g v-for="(relation, index) in store.relations" :key="index">
         <line
-          :x1="getConnectionPoint(relation.from).centerX"
-          :y1="getConnectionPoint(relation.from).centerY"
-          :x2="getConnectionPoint(relation.to).centerX"
-          :y2="getConnectionPoint(relation.to).centerY"
+          :x1="getAnchorPosition(relation.from, relation.fromAnchor.name).x"
+          :y1="getAnchorPosition(relation.from, relation.fromAnchor.name).y"
+          :x2="getAnchorPosition(relation.to, relation.toAnchor.name).x"
+          :y2="getAnchorPosition(relation.to, relation.toAnchor.name).y"
           stroke="black"
           stroke-width="2"
           class="relation-line"
           @click.stop="toggleDeleteButton(index)"
         />
+        <!-- Marker FROM -->
+        <!--<g :transform="`translate(${getConnectionPoint(relation.from, relation.to).x}, ${getConnectionPoint(relation.from, relation.to).y})`">
+          <component :is="store.getRelationSymbol(relation.fromType)" />
+        </g>-->
+      
+        <!-- Marker TO -->
+        <!--<g :transform="`translate(${getConnectionPoint(relation.to, relation.from).x}, ${getConnectionPoint(relation.to, relation.from).y})`">
+          <component :is="store.getRelationSymbol(relation.toType)" />
+        </g>-->
       <!-- Кнопка удаления связи -->
       <g v-if="selectedRelationId  === index">
           <rect
@@ -49,6 +58,8 @@
         top: element.y + 'px',
         cursor: draggingElementId === element.id ? 'grabbing' : 'grab'
       }"
+      @mouseenter="hoveredTableId = element.id"
+      @mouseleave="hoveredTableId = null"
       @mousedown="drag($event, element.id)"
       @click.stop="store.selectElement(element.id)"
     >
@@ -84,6 +95,21 @@
         </tr>
       </table>
       <button class="add-column-button" @click.stop="store.addColumn(element.id)">+</button>
+      
+      <!-- Anchor-точки -->
+      <template v-if="store.isAddingRelation && hoveredTableId === element.id">
+        <!-- Теперь v-for внутри корректен -->
+        <div
+          v-for="anchor in getAnchors(element)"
+          :key="anchor.name"
+          class="anchor-point"
+          :style="{
+            left: anchor.x + 'px',
+            top: anchor.y + 'px'
+          }"
+          @click.stop="handleAnchorClick(element.id, anchor)"
+        />
+      </template>
     </div>
   </div>
 </template>
@@ -96,6 +122,8 @@
   const draggingElementId = ref(null);
   const dragOffset = ref({ x: 0, y: 0 });
   const selectedRelationId  = ref(null);
+  
+  //const firstDot = ref(null);
 
   const drag = (event, id) => {
     const element = store.elements.find(e => e.id === id);
@@ -182,69 +210,74 @@
     return relation.from && relation.to ? (centerYFrom + centerYTo) / 2 : 0;
   };
 
-  const getConnectionPoint = (tableId) => {
+  const hoveredTableId = ref(null);
+
+  const getAnchors = (element) => {
+    const tableEl = document.querySelector(`[data-id="${element.id}"]`);
+    if (!tableEl) return [];
+
+    const rect = tableEl.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+
+    return [
+      { name: 'top-left', x: 0, y: 0 },
+      { name: 'top-center', x: width / 2, y: 0 },
+      { name: 'top-right', x: width, y: 0 },
+      { name: 'right-center', x: width, y: height / 2 },
+      { name: 'bottom-right', x: width, y: height },
+      { name: 'bottom-center', x: width / 2, y: height },
+      { name: 'bottom-left', x: 0, y: height },
+      { name: 'left-center', x: 0, y: height / 2 }
+    ];
+  };
+
+  const getAnchorPosition = (tableId, anchorName) => {
+    console.log("anchorName" + anchorName);
+
     const table = document.querySelector(`[data-id="${tableId}"]`);
-    if (!table) return { x: 0, y: 0 };
-    const rect = table.getBoundingClientRect();
-    const centerX = rect.x;
-    console.log('rect.x: '+rect.x);
-    console.log('rect.width: ' + rect.width);
-    const centerY = rect.y + rect.height / 2;
-    console.log('rect.y: '+rect.x);
-    console.log('rect.height: ' + rect.height);
-    console.log(centerX);
-    console.log(centerY);
-    console.log('h '+rect.height);
-    console.log('w '+rect.width);
+    const canvas = document.querySelector(".canvas");
+    if (!table || !canvas) return { x: 0, y: 0 };
 
-    return { centerX,centerY };
-  }
+    const tableRect = table.getBoundingClientRect();
+    const canvasRect = canvas.getBoundingClientRect();
 
-  /*const getConnectionPoint = (tableId, targetX, targetY) => {
-    const table = document.querySelector(`[data-id="${tableId}"]`);
-    if (!table) return { x: 0, y: 0 };
+    const width = tableRect.width;
+    const height = tableRect.height;
 
-    console.log("TABLE : " + tableId );//
+    const anchorOffsets = {
+      'top-left': { x: 0, y: 0 },
+      'top-center': { x: width / 2, y: 0 },
+      'top-right': { x: width, y: 0 },
+      'right-center': { x: width, y: height / 2 },
+      'bottom-right': { x: width, y: height },
+      'bottom-center': { x: width / 2, y: height },
+      'bottom-left': { x: 0, y: height },
+      'left-center': { x: 0, y: height / 2 }
+    };
 
-    const rect = table.getBoundingClientRect();
-    console.log("rect.x : " + rect.x );//
-    console.log("rect.y: " + rect.y);
-    console.log("rect.width : " + rect.width );//
-    console.log("rect.height: " + rect.height);
+    const offset = anchorOffsets[anchorName] || { x: 0, y: 0 };
 
-    const centerX = rect.x + rect.width / 2;
-    const centerY = rect.y + rect.height / 2;
-    console.log("centerX: " + centerX);//
-    console.log("centerY: " + centerY);//
+    return {
+      x: tableRect.left - canvasRect.left + offset.x,
+      y: tableRect.top - canvasRect.top + offset.y
+    };
+  };
 
-    const dx = targetX - centerX;
-    const dy = targetY - centerY;
-    const aspectRatio = rect.width / rect.height;
-    console.log("dx: " + dx);
-    console.log("dy: " + dy);
-    console.log("aspectRatio: " + aspectRatio);
 
-    let x = centerX;
-    let y = centerY;
-    console.log("x: " + x);
-    console.log("y: " + y);
-
-    if (Math.abs(dx / dy) > aspectRatio) {
-      // Соединяемся с левой или правой границей
-      x = dx > 0 ? rect.x + rect.width : rect.x;
-      y = centerY + (rect.height / 2) * (dy / Math.abs(dx));
-      console.log("x: " + x);
-      console.log("y: " + y);
+  const handleAnchorClick = (tableId, anchor) => {
+    console.log("Clicked anchor:", { tableId, anchor });
+    if (!store.relationStart) {
+      console.log("Start relation");
+      store.startRelation(tableId, anchor);
     } else {
-      // Соединяемся с верхней или нижней границей
-      x = centerX + (rect.width / 2) * (dx / Math.abs(dy));
-      y = dy > 0 ? rect.y + rect.height : rect.y;
-      console.log("x: " + x);
-      console.log("y: " + y);
+      console.log("Finish relation");
+      store.finishRelation(tableId, anchor);
     }
+  };
 
-    return { x, y };
-  };*/
+
+
 
 </script>
 
@@ -393,5 +426,16 @@
     cursor: pointer;
   }
 
+  .anchor-point {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #007bff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.2s;
+    cursor: pointer;
+    z-index: 5;
+  }
 
 </style>
