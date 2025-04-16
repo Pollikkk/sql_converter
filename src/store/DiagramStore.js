@@ -91,6 +91,18 @@ export const useDiagramStore = defineStore("diagram", {
       console.log("from: " + this.relationStart.tableId);
       console.log("fromAnchor: " + this.relationStart.anchor.name);
 
+      //Проверка на дублирование связи
+      const exists = this.relations.some(r =>
+        r.from === this.relationStart.tableId &&
+        r.to === tableId
+      );
+      
+      if (exists) {
+        console.warn("Такая связь уже существует");
+        this.cancelRelation();
+        return;
+      }
+
       this.relations.push({
         from: this.relationStart.tableId,
         fromAnchor: this.relationStart.anchor, // сохраняем имя/позицию
