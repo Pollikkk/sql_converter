@@ -14,14 +14,14 @@
       1 : М
     </button>
     -->
-    <button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation">
-      {{ store.isAddingRelation ? 'Выход' : 'М : М' }}
+    <button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation; store.relationType = 'M:M'">
+      {{ store.isAddingRelation ? 'Выход' : 'M : M' }}
     </button>
-    <button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation">
+    <button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation; store.relationType = '1:1'">
       {{ store.isAddingRelation ? 'Выход' : '1 : 1' }}
     </button>
-    <button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation">
-      {{ store.isAddingRelation ? 'Выход' : '1 : М' }}
+    <button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation; store.relationType = '1:M'">
+      {{ store.isAddingRelation ? 'Выход' : '1 : M' }}
     </button>
     <button class="convert" @click="store.convertToSql(); isModalOpen = true">sql-код</button>
 

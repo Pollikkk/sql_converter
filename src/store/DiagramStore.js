@@ -8,6 +8,7 @@ export const useDiagramStore = defineStore("diagram", {
     sqlCode: "",
     isAddingRelation: false,
     relationStart: null,
+    relationType: "",
   }),
   actions: {
     addElement(type) {
@@ -79,7 +80,7 @@ export const useDiagramStore = defineStore("diagram", {
     removeRelation(index) {
       this.relations.splice(index, 1);
     },
-
+    
     startRelation(tableId, anchor){
       this.relationStart = { tableId, anchor };
     },
@@ -103,16 +104,20 @@ export const useDiagramStore = defineStore("diagram", {
         return;
       }
 
+      const parts = this.relationType.split(':');
       this.relations.push({
         from: this.relationStart.tableId,
         fromAnchor: this.relationStart.anchor, // сохраняем имя/позицию
+        fromType: parts[0],
         to: tableId,
-        toAnchor: anchor
+        toAnchor: anchor,
+        toType: parts[1]
       });
   
       // Очистка после добавления
       this.relationStart = null;
       this.isAddingRelation = false;
+      this.relationType = "";
 
       console.log(this.relations);
     },

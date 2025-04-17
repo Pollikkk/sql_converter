@@ -2,49 +2,14 @@
   <div class="canvas" @click="clearSelection" @mousemove="move" @mouseup="drop">
     <!-- Рисуем связи -->
     <svg class="relations">
-      <g v-for="(relation, index) in store.relations" :key="index">
-        <line
-          :x1="getAnchorPosition(relation.from, relation.fromAnchor.name).x"
-          :y1="getAnchorPosition(relation.from, relation.fromAnchor.name).y"
-          :x2="getAnchorPosition(relation.to, relation.toAnchor.name).x"
-          :y2="getAnchorPosition(relation.to, relation.toAnchor.name).y"
-          stroke="black"
-          stroke-width="2"
-          class="relation-line"
-          @click.stop="toggleDeleteButton(index)"
-        />
-        <!-- Marker FROM -->
-        <!--<g :transform="`translate(${getConnectionPoint(relation.from, relation.to).x}, ${getConnectionPoint(relation.from, relation.to).y})`">
-          <component :is="store.getRelationSymbol(relation.fromType)" />
-        </g>-->
-      
-        <!-- Marker TO -->
-        <!--<g :transform="`translate(${getConnectionPoint(relation.to, relation.from).x}, ${getConnectionPoint(relation.to, relation.from).y})`">
-          <component :is="store.getRelationSymbol(relation.toType)" />
-        </g>-->
-      <!-- Кнопка удаления связи -->
-      <g v-if="selectedRelationId  === index">
-          <rect
-            :x="getMidX(index) - 10"
-            :y="getMidY(index) - 10"
-            width="20"
-            height="20"
-            fill="black"
-            rx="5"
-            cursor="pointer"
-            @click.stop="store.removeRelation(index)"
-          />
-          <text
-            :x="getMidX(index)"
-            :y="getMidY(index) + 5"
-            font-size="14"
-            fill="white"
-            text-anchor="middle"
-            cursor="pointer"
-            @click.stop="store.removeRelation(index)"
-          >✖</text>
-        </g>
-      </g>
+      <RelationLine
+      v-for="(relation, index) in store.relations"
+      :key="index"
+      :relation="relation"
+      :index="index"
+      :selected="selectedRelationId === index"
+      @toggle="toggleDeleteButton"
+    />
     </svg>
     <!-- Отображение таблиц -->
     <div
@@ -118,12 +83,16 @@
   import { ref } from "vue";
   import { useDiagramStore } from "@/store/DiagramStore";
 
+  import RelationLine from  "./RelationLine.vue";
+
   const store = useDiagramStore();
   const draggingElementId = ref(null);
   const dragOffset = ref({ x: 0, y: 0 });
   const selectedRelationId  = ref(null);
   
   //const firstDot = ref(null);
+
+
 
   const drag = (event, id) => {
     const element = store.elements.find(e => e.id === id);
@@ -148,16 +117,20 @@
       const canvasRect = canvas.getBoundingClientRect();
       const elementNode = document.querySelector(`[data-id="${element.id}"]`); // Получаем DOM-элемент таблицы
       if (!elementNode) return;
-
       const elementRect = elementNode.getBoundingClientRect(); // Определяем реальные размеры таблицы
 
       // Ограничиваем координаты
       const newX = event.clientX - dragOffset.value.x;
       const newY = event.clientY - dragOffset.value.y;
 
-      element.x = Math.max(0, Math.min(newX, canvasRect.width - elementRect.width));
-      element.y = Math.max(0, Math.min(newY, canvasRect.height - elementRect.height));
-  }
+      //element.x = Math.max(0, Math.min(newX, canvasRect.width - elementRect.width));
+      //element.y = Math.max(0, Math.min(newY, canvasRect.height - elementRect.height));
+      store.updatePosition(
+        draggingElementId.value,
+        Math.max(0, Math.min(newX, canvasRect.width - elementRect.width)),
+        Math.max(0, Math.min(newY, canvasRect.height - elementRect.height))
+      );
+    }
   };
 
   const drop = () => {
@@ -174,40 +147,6 @@
   const clearSelection = () => {
     selectedRelationId.value = null;
     store.selectedElements = [];
-  };
-
-  // Функция для поиска элемента по id
-  //const getElement = (id) => store.elements.find(e => e.id === id);
-
-  const getMidX = (index) => {
-    const relation = store.relations[index];
-
-    const tableFrom = document.querySelector(`[data-id="${relation.from}"]`);
-    if (!tableFrom) return { x: 0, y: 0 };
-    const rectFrom = tableFrom.getBoundingClientRect();
-    const centerXFrom = rectFrom.x;
-
-    const tableTo = document.querySelector(`[data-id="${relation.to}"]`);
-    if (!tableTo) return { x: 0, y: 0 };
-    const rectTo = tableTo.getBoundingClientRect();
-    const centerXTo = rectTo.x;
-
-    return relation.from && relation.to ? (centerXFrom + centerXTo) / 2 : 0;
-  };
-  const getMidY = (index) => {
-    const relation = store.relations[index];
-
-    const tableFrom = document.querySelector(`[data-id="${relation.from}"]`);
-    if (!tableFrom) return { x: 0, y: 0 };
-    const rectFrom = tableFrom.getBoundingClientRect();
-    const centerYFrom = rectFrom.y + rectFrom.height / 2;
-
-    const tableTo = document.querySelector(`[data-id="${relation.to}"]`);
-    if (!tableTo) return { x: 0, y: 0 };
-    const rectTo = tableTo.getBoundingClientRect();
-    const centerYTo = rectTo.y + rectTo.height / 2;
-
-    return relation.from && relation.to ? (centerYFrom + centerYTo) / 2 : 0;
   };
 
   const hoveredTableId = ref(null);
@@ -232,39 +171,6 @@
     ];
   };
 
-  const getAnchorPosition = (tableId, anchorName) => {
-    console.log("anchorName" + anchorName);
-
-    const table = document.querySelector(`[data-id="${tableId}"]`);
-    const canvas = document.querySelector(".canvas");
-    if (!table || !canvas) return { x: 0, y: 0 };
-
-    const tableRect = table.getBoundingClientRect();
-    const canvasRect = canvas.getBoundingClientRect();
-
-    const width = tableRect.width;
-    const height = tableRect.height;
-
-    const anchorOffsets = {
-      'top-left': { x: 0, y: 0 },
-      'top-center': { x: width / 2, y: 0 },
-      'top-right': { x: width, y: 0 },
-      'right-center': { x: width, y: height / 2 },
-      'bottom-right': { x: width, y: height },
-      'bottom-center': { x: width / 2, y: height },
-      'bottom-left': { x: 0, y: height },
-      'left-center': { x: 0, y: height / 2 }
-    };
-
-    const offset = anchorOffsets[anchorName] || { x: 0, y: 0 };
-
-    return {
-      x: tableRect.left - canvasRect.left + offset.x,
-      y: tableRect.top - canvasRect.top + offset.y
-    };
-  };
-
-
   const handleAnchorClick = (tableId, anchor) => {
     console.log("Clicked anchor:", { tableId, anchor });
     if (!store.relationStart) {
@@ -275,9 +181,6 @@
       store.finishRelation(tableId, anchor);
     }
   };
-
-
-
 
 </script>
 
@@ -305,6 +208,10 @@
     stroke-width: 3;
   }
 
+  .delete-relation{
+    z-index: 20;
+  }
+
   .element {
     position: absolute;
     background: white;
@@ -315,6 +222,7 @@
     min-width: 200px;
     max-width: 350px;
     width: 250px;
+    z-index: 10;
   }
 
   .element.selected {
@@ -435,7 +343,12 @@
     transform: translate(-50%, -50%);
     transition: opacity 0.2s;
     cursor: pointer;
-    z-index: 5;
+    z-index: 25;
+  }
+  .anchor-point:hover{
+    background-color: #71b6ff;
+    width: 15px;
+    height: 15px;
   }
 
 </style>
