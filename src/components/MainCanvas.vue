@@ -41,6 +41,8 @@
         </tr>
         <tr v-for="(col, index) in element.columns" :key="index">
           <button class="delete-column" @click.stop="store.removeColumn(element.id, col.id)">🗑</button>
+          <span v-if="col.isPK">🔑</span>
+          <span v-else-if="col.isFK">🔗</span>
           <td>
             <input type="checkbox" v-model="col.isPK" class="" />
           </td>
@@ -80,7 +82,7 @@
 </template>
 
 <script setup>
-  import { ref } from "vue";
+  import { ref, watchEffect } from "vue";
   import { useDiagramStore } from "@/store/DiagramStore";
 
   import RelationLine from  "./RelationLine.vue";
@@ -92,7 +94,56 @@
   
   //const firstDot = ref(null);
 
+  /*watch(
+  () => store.elements.flatMap(el => el.columns.filter(c => c.isPK)),
+  (newPKs, oldPKs) => {
+    newPKs.forEach((newPk, index) => {
+      const oldPk = oldPKs?.[index];
+      if (!newPk || !oldPk) return; // безопасность
 
+      // Только если имя действительно изменилось
+      if (newPk.name !== oldPk.name) {
+        store.elements.forEach(table => {
+          table.columns.forEach(col => {
+            if (
+              col.isFK &&
+              col.references &&
+              col.references.column === oldPk.name &&
+              col.references.table === oldPk.references?.table
+            ) {
+              col.references.column = newPk.name;
+              // Переименование FK, если хочешь
+              col.name = `${newPk.references?.table?.toLowerCase() ?? 'ref'}_${newPk.name}_fk`;
+            }
+          });
+        });
+      }
+    });
+  },
+  { deep: true }
+);*/
+
+  watchEffect(() => {
+    store.elements.forEach(parentTable => {
+      const pk = parentTable.columns.find(col => col.isPK);
+      if (!pk) return;
+
+      store.elements.forEach(childTable => {
+        childTable.columns.forEach(col => {
+          if (col.isFK && col.references?.tableId === parentTable.id) {
+            // Обновляем PK
+            //col.references.columnId = pk.id;
+
+            // Обновляем имя внешнего ключа
+            const expectedName = `${parentTable.name.toLowerCase()}_${pk.name}_fk`;
+            if (col.name !== expectedName) {
+              col.name = expectedName;
+            }
+          }
+        });
+      });
+    });
+  });
 
   const drag = (event, id) => {
     const element = store.elements.find(e => e.id === id);

@@ -52,7 +52,7 @@
     </g>
   </template>
   
-  <script setup>
+<script setup>
   import { computed, defineProps, defineEmits } from 'vue'
   import { useDiagramStore } from '@/store/DiagramStore'
   import ManyType from './relation_types/ManyType.vue'
@@ -97,37 +97,7 @@
       x: x + offset.x,
       y: y + offset.y
     }
-}
-
-  /*const getAnchorPosition = (tableId, anchorName) => {
-    const table = document.querySelector(`[data-id="${tableId}"]`);
-    const canvas = document.querySelector(".canvas");
-    if (!table || !canvas) return { x: 0, y: 0 };
-  
-    const tableRect = table.getBoundingClientRect();
-    const canvasRect = canvas.getBoundingClientRect();
-  
-    const width = tableRect.width;
-    const height = tableRect.height;
-  
-    const anchorOffsets = {
-      'top-left': { x: 0, y: 0 },
-      'top-center': { x: width / 2, y: 0 },
-      'top-right': { x: width, y: 0 },
-      'right-center': { x: width, y: height / 2 },
-      'bottom-right': { x: width, y: height },
-      'bottom-center': { x: width / 2, y: height },
-      'bottom-left': { x: 0, y: height },
-      'left-center': { x: 0, y: height / 2 }
-    };
-  
-    const offset = anchorOffsets[anchorName] || { x: 0, y: 0 };
-  
-    return {
-      x: tableRect.left - canvasRect.left + offset.x,
-      y: tableRect.top - canvasRect.top + offset.y
-    };
-  };*/
+  }
   
   const fromPos = computed(() =>
     getAnchorPosition(props.relation.from, props.relation.fromAnchor.name)
@@ -163,9 +133,9 @@
   const toggleDeleteButton = () => {
     emit('toggle', props.index)
   }
-  </script>
+</script>
   
-  <style scoped>
+<style scoped>
   .relation-line {
     cursor: pointer;
     transition: stroke 0.2s ease-in-out;
@@ -173,5 +143,4 @@
   .relation-line:hover {
     stroke-width: 3;
   }
-  </style>
-  
+</style>

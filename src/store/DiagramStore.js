@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { reactive } from 'vue';
 
 export const useDiagramStore = defineStore("diagram", {
   state: () => ({
@@ -8,18 +9,31 @@ export const useDiagramStore = defineStore("diagram", {
     sqlCode: "",
     isAddingRelation: false,
     relationStart: null,
-    relationType: "",
+    relationType: ""
   }),
   actions: {
     addElement(type) {
-      const newElement = {
+      const newElement = reactive({
         id: Date.now(),
         type,
         x: 100,
         y: 100,
         name: "Новая таблица",
-        columns: [{ id: Date.now(), isPK: true, name: "id", type: "INT" }, { id: Date.now() + 1, isPK: false, name: "name", type: "VARCHAR(255)" }], // Добавляем столбцы по умолчанию
-      };
+        columns: reactive([
+          reactive({
+            id: Date.now(),
+            isPK: true,
+            name: "id",
+            type: "INT"
+          }),
+          reactive({
+            id: Date.now() + 1,
+            isPK: false,
+            name: "name",
+            type: "VARCHAR(255)"
+          })
+        ])
+      });
       this.elements.push(newElement);
       console.log(this.elements);
     },
@@ -34,7 +48,7 @@ export const useDiagramStore = defineStore("diagram", {
     addColumn(id) {
       const element = this.elements.find(e => e.id === id);
       if (element) {
-        element.columns.push({ id: Date.now(), isPK: false, name: "new_column", type: "VARCHAR(255)" });
+        element.columns.push(reactive({ id: Date.now(), isPK: false, name: "new_column", type: "VARCHAR(255)" }));
       }
     },
     removeColumn(elId, colId) {
@@ -78,6 +92,22 @@ export const useDiagramStore = defineStore("diagram", {
       return null;
     },
     removeRelation(index) {
+      //убираем внешние ключи
+      const rel = this.relations[index];
+      if (!rel) return;
+
+      const fromTable = this.elements.find(e => e.id === rel.from);
+      const toTable = this.elements.find(e => e.id === rel.to);
+      const pkFrom = fromTable?.columns.find(c => c.isPK);
+      const pkTo = toTable?.columns.find(c => c.isPK);
+
+      if (pkFrom && toTable) {
+        toTable.columns = toTable.columns.filter(col => !(col.isFK && col.references?.columnId === pkFrom.id));
+      }
+      if (pkTo && fromTable) {
+        fromTable.columns = fromTable.columns.filter(col => !(col.isFK && col.references?.columnId === pkTo.id));
+      }
+
       this.relations.splice(index, 1);
     },
     
@@ -91,6 +121,10 @@ export const useDiagramStore = defineStore("diagram", {
       console.log("toAnchor: " + anchor.name);
       console.log("from: " + this.relationStart.tableId);
       console.log("fromAnchor: " + this.relationStart.anchor.name);
+
+
+      const fromTableId = this.relationStart.tableId;
+      const toTableId = tableId;
 
       //Проверка на дублирование связи
       const exists = this.relations.some(r =>
@@ -114,17 +148,80 @@ export const useDiagramStore = defineStore("diagram", {
         toType: parts[1]
       });
   
+  
+//ПОДУМАТЬ НАД ТЕМ, КАК КОНТРОЛИРОВАТЬ НАЗВАНИЯ ВНЕШНИХ КЛЮЧЕЙ ПРИ ИЗМЕНЕНИИ НАЗВАНИЯ, ПОЛЕЙ ТАБЛИЦЫ
+      //addForeignKey(tableId);
+      const fromTable = this.elements.find(e => e.id === fromTableId);
+      const toTable = this.elements.find(e => e.id === toTableId);
+      if(parts[0] == '1' && parts[1] == '1' || parts[0] == '1' && parts[1] == 'M'){
+        if (fromTable && toTable) {
+          const pk = fromTable.columns.find(c => c.isPK);
+          if (pk) {
+            const fkName = `${fromTable.name.toLowerCase()}_${pk.name}_fk`;
+            toTable.columns.push({
+              id: Date.now(),
+              name: fkName,
+              type: pk.type,
+              isPK: false,
+              isFK: true,
+              references: {
+                tableId: fromTable.id,
+                columnId: pk.id
+              }
+            });
+          }
+        }
+      }
+
+      if(parts[0] == 'M' && parts[1] == 'M'){
+        if (fromTable && toTable) {
+          const pk1 = fromTable.columns.find(c => c.isPK);
+          const pk2 = toTable.columns.find(c => c.isPK);
+          if (pk1) {
+            const fkName = `${fromTable.name.toLowerCase()}_${pk1.name}_fk`;
+            toTable.columns.push({
+              id: Date.now(),
+              name: fkName,
+              type: pk1.type,
+              isPK: false,
+              isFK: true,
+              references: {
+                tableId: fromTable.id,
+                columnId: pk1.id
+              }
+            });
+          }
+          if (pk2) {
+            const fkName = `${toTable.name.toLowerCase()}_${pk2.name}_fk`;
+            fromTable.columns.push({
+              id: Date.now(),
+              name: fkName,
+              type: pk2.type,
+              isPK: false,
+              isFK: true,
+              references: {
+                tableId: fromTable.id,
+                columnId: pk2.id
+              }
+            });
+          }
+        }
+      }
+
       // Очистка после добавления
       this.relationStart = null;
       this.isAddingRelation = false;
       this.relationType = "";
-
       console.log(this.relations);
     },
     cancelRelation(){
       this.relationStart = null;
       this.isAddingRelation = false;
     },
+
+    /*addForeignKey(idTable){
+
+    },*/
 
     convertToSql(){
       //checkScheme();

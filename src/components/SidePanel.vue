@@ -42,6 +42,7 @@
 
   const store = useDiagramStore()
   const addElement = (type) => store.addElement(type)
+  
 </script>
 
 <style lang="scss">
