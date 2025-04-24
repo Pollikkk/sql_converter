@@ -200,7 +200,7 @@ export const useDiagramStore = defineStore("diagram", {
               isPK: false,
               isFK: true,
               references: {
-                tableId: fromTable.id,
+                tableId: toTable.id,
                 columnId: pk2.id
               }
             });

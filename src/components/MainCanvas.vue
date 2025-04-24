@@ -123,27 +123,40 @@
   { deep: true }
 );*/
 
-  watchEffect(() => {
-    store.elements.forEach(parentTable => {
-      const pk = parentTable.columns.find(col => col.isPK);
-      if (!pk) return;
+watchEffect(() => {
+  store.relations.forEach(relation => {
+    const fromTable = store.elements.find(t => t.id === relation.from);
+    const toTable = store.elements.find(t => t.id === relation.to);
+    if (!fromTable || !toTable) return;
 
-      store.elements.forEach(childTable => {
-        childTable.columns.forEach(col => {
-          if (col.isFK && col.references?.tableId === parentTable.id) {
-            // Обновляем PK
-            //col.references.columnId = pk.id;
-
-            // Обновляем имя внешнего ключа
-            const expectedName = `${parentTable.name.toLowerCase()}_${pk.name}_fk`;
-            if (col.name !== expectedName) {
-              col.name = expectedName;
-            }
-          }
-        });
+    const fromPK = fromTable.columns.find(c => c.isPK);
+    const toPK = toTable.columns.find(c => c.isPK);
+    
+    // Обновление FK в toTable, если оно ссылается на fromTable
+    if (fromPK) {
+      toTable.columns.forEach(col => {
+        if (col.isFK && col.references?.tableId === fromTable.id) {
+          col.references.columnId = fromPK.id;
+          col.name = `${fromTable.name.toLowerCase()}_${fromPK.name}_fk`;
+        }
       });
-    });
+    }
+
+    // Обновление FK в fromTable, если оно ссылается на toTable
+    if (toPK) {
+      fromTable.columns.forEach(col => {
+        if (col.isFK) {
+          console.log("Проверяю FK в fromTable", col.references?.tableId, "должно быть", toTable.id);
+        }
+        if (col.isFK && col.references?.tableId === toTable.id) {
+          col.references.columnId = toPK.id;
+          col.name = `${toTable.name.toLowerCase()}_${toPK.name}_fk`;
+        }
+      });
+    }
   });
+});
+
 
   const drag = (event, id) => {
     const element = store.elements.find(e => e.id === id);
