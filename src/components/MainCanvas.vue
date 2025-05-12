@@ -5,7 +5,8 @@
   </div>
   <SaveSchemaModal v-if="showSaveModal"  @close="showSaveModal = false" />
   <MySchemasModal v-if="showAllSchemasModal" @close="showAllSchemasModal = false" />
-  <div class="canvas" @click="clearSelection" @mousemove="move" @mouseup="drop">
+  <div class="canvas" ref="canvasRef" @click="clearSelection" @mousemove="move" @mouseup="drop">
+    <div class="canvas-content">
     <div
       v-for="element in store.elements"
       :key="element.id"
@@ -69,6 +70,7 @@
         />
       </template>
   </div>
+  </div>
 </div>
 <!-- Рисуем связи -->
     <svg class="relations">
@@ -92,7 +94,7 @@
 </template>
 
 <script setup>
-  import { ref, watchEffect } from "vue";
+  import { ref, watchEffect, onMounted } from "vue";
   import { useDiagramStore } from "@/store/DiagramStore";
 
   import RelationLine from  "./RelationLine.vue";
@@ -107,6 +109,21 @@
   const draggingElementId = ref(null);
   const dragOffset = ref({ x: 0, y: 0 });
   const selectedRelationId  = ref(null);
+
+  const canvasRef = ref<HTMLElement | null>(null);
+
+  onMounted(() => {
+    const canvas = canvasRef.value;
+    if (canvas) {
+      const contentWidth = 3000; // ширина canvas-content
+      const contentHeight = 3000; // высота canvas-content
+      const viewWidth = canvas.clientWidth;
+      const viewHeight = canvas.clientHeight;
+
+      canvas.scrollLeft = (contentWidth - viewWidth) / 2;
+      canvas.scrollTop = (contentHeight - viewHeight) / 2;
+    }
+  });
 
   watchEffect(() => {
   store.relations.forEach(relation => {
@@ -156,31 +173,13 @@
 
   const move = (event) => {
     if (draggingElementId.value === null) return;
-
-    const element = store.elements.find(e => e.id === draggingElementId.value);
-    if (element) {
-      // Получаем размеры канвы
-      const canvas = document.querySelector(".canvas");
-      if (!canvas) return;
-
-      const canvasRect = canvas.getBoundingClientRect();
-      const elementNode = document.querySelector(`[data-id="${element.id}"]`); // Получаем DOM-элемент таблицы
-      if (!elementNode) return;
-      const elementRect = elementNode.getBoundingClientRect(); // Определяем реальные размеры таблицы
-
-      // Ограничиваем координаты
-      const newX = event.clientX - dragOffset.value.x;
-      const newY = event.clientY - dragOffset.value.y;
-
-      //element.x = Math.max(0, Math.min(newX, canvasRect.width - elementRect.width));
-      //element.y = Math.max(0, Math.min(newY, canvasRect.height - elementRect.height));
-      store.updatePosition(
-        draggingElementId.value,
-        Math.max(0, Math.min(newX, canvasRect.width - elementRect.width)),
-        Math.max(0, Math.min(newY, canvasRect.height - elementRect.height))
-      );
-    }
+    
+    const newX = event.clientX - dragOffset.value.x;
+    const newY = event.clientY - dragOffset.value.y;
+    
+    store.updatePosition(draggingElementId.value, newX, newY);
   };
+
 
   const drop = () => {
     draggingElementId.value = null;
@@ -239,6 +238,13 @@
     position: relative;
     background: #fff;
     height: 95vh;
+    overflow: auto; /* включаем прокрутку */
+  }
+
+  .canvas-content {
+    position: relative;
+    width: 3000px;   /* можно регулировать */
+    height: 3000px;  /* можно регулировать */
   }
 
   .relations {
