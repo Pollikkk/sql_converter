@@ -57,6 +57,8 @@
   import { useDiagramStore } from '@/store/DiagramStore'
   import ManyType from './relation_types/ManyType.vue'
   import OneType from './relation_types/OneType.vue'
+  import OptionalOneType from './relation_types/OptionalOneType.vue'
+  import OptionalManyType from './relation_types/OptionalManyType.vue'
   
   const props = defineProps({
     relation: Object,
@@ -126,6 +128,9 @@
     switch (type) {
       case 'M': return ManyType;
       case '1': return OneType;
+      case '0..1': return OptionalOneType;
+      case '0..M': return OptionalManyType;
+      case 'none': return '';
       default: return OneType;
     }
   }

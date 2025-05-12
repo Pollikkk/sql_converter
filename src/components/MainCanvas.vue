@@ -1,17 +1,11 @@
 <template>
+  <div class="upperButtons">
+    <button @click="showSaveModal = true">💾</button>
+    <button @click="showAllSchemasModal = true">📂</button>
+  </div>
+  <SaveSchemaModal v-if="showSaveModal"  @close="showSaveModal = false" />
+  <MySchemasModal v-if="showAllSchemasModal" @close="showAllSchemasModal = false" />
   <div class="canvas" @click="clearSelection" @mousemove="move" @mouseup="drop">
-    <!-- Рисуем связи -->
-    <svg class="relations">
-      <RelationLine
-      v-for="(relation, index) in store.relations"
-      :key="index"
-      :relation="relation"
-      :index="index"
-      :selected="selectedRelationId === index"
-      @toggle="toggleDeleteButton"
-    />
-    </svg>
-    <!-- Отображение таблиц -->
     <div
       v-for="element in store.elements"
       :key="element.id"
@@ -28,6 +22,8 @@
       @mousedown="drag($event, element.id)"
       @click.stop="store.selectElement(element.id)"
     >
+    <!-- ТАБЛИЦА -->
+    <div>
       <div class="table-header">
         <input v-model="element.name" class="table-title" />
         <button class="delete-btn" @click.stop="store.removeElement(element.id)">🗑</button>
@@ -42,17 +38,13 @@
         <tr v-for="(col, index) in element.columns" :key="index">
           <button class="delete-column" @click.stop="store.removeColumn(element.id, col.id)">🗑</button>
           <span v-if="col.isPK">🔑</span>
-          <span v-else-if="col.isFK">🔗</span>
-          <td>
-            <input type="checkbox" v-model="col.isPK" class="" />
-          </td>
-          <td>
-            <input v-model="col.name" class="column-input" />
-          </td>
+          <span v-if="col.isFK">🔗</span>
+          <td><input type="checkbox" v-model="col.isPK" /></td>
+          <td><input v-model="col.name" class="column-input" /></td>
           <td>
             <select v-model="col.type" class="type-select">
               <option value="INT">INT</option>
-              <option value="VARCHAR(255)">VARCHAR(255)</option>
+              <option value="VARCHAR(256)">VARCHAR(255)</option>
               <option value="TEXT">TEXT</option>
               <option value="BOOLEAN">BOOLEAN</option>
               <option value="DATE">DATE</option>
@@ -62,10 +54,9 @@
         </tr>
       </table>
       <button class="add-column-button" @click.stop="store.addColumn(element.id)">+</button>
-      
+
       <!-- Anchor-точки -->
       <template v-if="store.isAddingRelation && hoveredTableId === element.id">
-        <!-- Теперь v-for внутри корректен -->
         <div
           v-for="anchor in getAnchors(element)"
           :key="anchor.name"
@@ -77,7 +68,26 @@
           @click.stop="handleAnchorClick(element.id, anchor)"
         />
       </template>
-    </div>
+  </div>
+</div>
+<!-- Рисуем связи -->
+    <svg class="relations">
+      <RelationLine
+        v-for="(relation, index) in store.standardRelations"
+        :key="index"
+        :relation="relation"
+        :index="index"
+        :selected="selectedRelationId === index"
+        @toggle="toggleDeleteButton"
+      />
+      <InheritanceLine
+        v-for="(relation, index) in store.inheritanceRelations"
+        :key="'inh-' + index"
+        :from-id="relation.from"
+        :to-id="relation.to"
+      />
+    </svg>
+
   </div>
 </template>
 
@@ -86,54 +96,32 @@
   import { useDiagramStore } from "@/store/DiagramStore";
 
   import RelationLine from  "./RelationLine.vue";
+  import InheritanceLine from "./InheritanceLine.vue";
+  import MySchemasModal from './MySchemasModal.vue' 
+  import SaveSchemaModal from "./SaveSchemaModal.vue";
+  
+  const showSaveModal = ref(false)
+  const showAllSchemasModal = ref(false);
 
   const store = useDiagramStore();
   const draggingElementId = ref(null);
   const dragOffset = ref({ x: 0, y: 0 });
   const selectedRelationId  = ref(null);
-  
-  //const firstDot = ref(null);
 
-  /*watch(
-  () => store.elements.flatMap(el => el.columns.filter(c => c.isPK)),
-  (newPKs, oldPKs) => {
-    newPKs.forEach((newPk, index) => {
-      const oldPk = oldPKs?.[index];
-      if (!newPk || !oldPk) return; // безопасность
-
-      // Только если имя действительно изменилось
-      if (newPk.name !== oldPk.name) {
-        store.elements.forEach(table => {
-          table.columns.forEach(col => {
-            if (
-              col.isFK &&
-              col.references &&
-              col.references.column === oldPk.name &&
-              col.references.table === oldPk.references?.table
-            ) {
-              col.references.column = newPk.name;
-              // Переименование FK, если хочешь
-              col.name = `${newPk.references?.table?.toLowerCase() ?? 'ref'}_${newPk.name}_fk`;
-            }
-          });
-        });
-      }
-    });
-  },
-  { deep: true }
-);*/
-
-watchEffect(() => {
+  watchEffect(() => {
   store.relations.forEach(relation => {
     const fromTable = store.elements.find(t => t.id === relation.from);
     const toTable = store.elements.find(t => t.id === relation.to);
     if (!fromTable || !toTable) return;
 
-    const fromPK = fromTable.columns.find(c => c.isPK);
-    const toPK = toTable.columns.find(c => c.isPK);
-    
-    // Обновление FK в toTable, если оно ссылается на fromTable
-    if (fromPK) {
+    const fromPK = Array.isArray(fromTable.columns)
+      ? fromTable.columns.find(c => c.isPK)
+      : null;
+    const toPK = Array.isArray(toTable.columns)
+      ? toTable.columns.find(c => c.isPK)
+      : null;
+
+    if (fromPK && Array.isArray(toTable.columns)) {
       toTable.columns.forEach(col => {
         if (col.isFK && col.references?.tableId === fromTable.id) {
           col.references.columnId = fromPK.id;
@@ -142,12 +130,8 @@ watchEffect(() => {
       });
     }
 
-    // Обновление FK в fromTable, если оно ссылается на toTable
-    if (toPK) {
+    if (toPK && Array.isArray(fromTable.columns)) {
       fromTable.columns.forEach(col => {
-        if (col.isFK) {
-          console.log("Проверяю FK в fromTable", col.references?.tableId, "должно быть", toTable.id);
-        }
         if (col.isFK && col.references?.tableId === toTable.id) {
           col.references.columnId = toPK.id;
           col.name = `${toTable.name.toLowerCase()}_${toPK.name}_fk`;
@@ -156,6 +140,7 @@ watchEffect(() => {
     }
   });
 });
+
 
 
   const drag = (event, id) => {
@@ -413,6 +398,36 @@ watchEffect(() => {
     background-color: #71b6ff;
     width: 15px;
     height: 15px;
+  }
+  .diamond-shape {
+    width: 20px;
+    height: 20px;
+    background-color: black;
+    transform: rotate(45deg);
+    margin: auto;
+  }
+
+  .upperButtons {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+    z-index: 10000; /* Поверх остального */
+    background-color: #000;
+    border-radius: 10px;
+  }
+
+  .upperButtons button {
+    padding: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0;
+    background-color: #000;
+    border-radius: 10px;
+  }
+  .upperButtons button:hover {
+    background-color: #434343;
   }
 
 </style>

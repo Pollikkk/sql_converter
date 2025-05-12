@@ -1,0 +1,23 @@
+<svg  version="1.1"
+     baseProfile="full"
+     xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 100 100"
+     width="40" height="42">
+    <g stroke="white" fill="none" stroke-width="2">
+      <!-- Родительская таблица -->
+      <rect x="40" y="10" width="20" height="20" />
+      <line x1="40" y1="20" x2="60" y2="20" />
+
+      <!-- Наследование (дуга ромба и соединения) -->
+      <line x1="50" y1="30" x2="50" y2="45" />
+      <polygon points="45,45 55,45 50,55" fill="black" stroke="white" />
+      <line x1="50" y1="55" x2="30" y2="80" />
+      <line x1="50" y1="55" x2="70" y2="80" />
+
+      <!-- Дочерние таблицы -->
+      <rect x="20" y="80" width="20" height="20" />
+      <line x1="20" y1="90" x2="40" y2="90" />
+      <rect x="60" y="80" width="20" height="20" />
+      <line x1="60" y1="90" x2="80" y2="90" />
+    </g>
+  </svg>

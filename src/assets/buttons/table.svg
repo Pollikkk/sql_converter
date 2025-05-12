@@ -1,0 +1,21 @@
+<svg  version="1.1"
+     baseProfile="full"
+     xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="40" height="40">
+  <g fill="none" stroke="white" stroke-width="1">
+    <!-- Внешняя рамка -->
+  <rect x="4" y="4" width="56" height="56" rx="4" ry="4"/>
+
+  <!-- Верхняя (заголовочная) строка -->
+  <line x1="4" y1="20" x2="60" y2="20" />
+
+  <!-- Горизонтальные линии -->
+  <line x1="4" y1="32" x2="60" y2="32" />
+  <line x1="4" y1="44" x2="60" y2="44" />
+
+  <!-- Вертикальные линии -->
+  <line x1="24" y1="20" x2="24" y2="60" />
+  <line x1="44" y1="20" x2="44" y2="60" />
+  </g>
+</svg>

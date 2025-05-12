@@ -1,35 +1,47 @@
 <template>
   <div class="side-panel">
-    <div>Добавить таблицу</div>
-    <button class="ordinary-button" @click="addElement('table')">Добавить таблицу</button>
-    <div>Добавить связи</div>
-    <!--
-    <button class="ordinary-button" @click="store.addRelation('M:M')" :disabled="store.selectedElements.length !== 2">
-      М : М
+    <h3>Сущности</h3>
+    <h4>простая</h4>
+    <button class="ordinary-button" @click="addElement()"><img src="../assets/buttons/table.svg" alt="Icon" width="auto" height="auto" /></button>
+    <h4>составная</h4>
+    <button class="ordinary-button" @click="addCompositeElement()"><img src="../assets/buttons/compositetable.svg" alt="Icon" width="auto" height="auto" /></button>
+    <h3>Связи</h3>
+    <button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation;">
+      <img src="../assets/buttons/relation.svg" alt="Icon" width="auto" height="auto" />
+      {{ store.isAddingRelation ? 'Выход' : '' }}
     </button>
-    <button class="ordinary-button" @click="store.addRelation('1:1')" :disabled="store.selectedElements.length !== 2">
-      1 : 1
-    </button>
-    <button class="ordinary-button" @click="store.addRelation('1:M')" :disabled="store.selectedElements.length !== 2">
-      1 : М
-    </button>
-    -->
-    <button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation; store.relationType = 'M:M'">
-      {{ store.isAddingRelation ? 'Выход' : 'M : M' }}
-    </button>
-    <button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation; store.relationType = '1:1'">
+    <!--<button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation; store.relationType = '1:1'">
       {{ store.isAddingRelation ? 'Выход' : '1 : 1' }}
     </button>
     <button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation; store.relationType = '1:M'">
       {{ store.isAddingRelation ? 'Выход' : '1 : M' }}
-    </button>
+    </button>-->
+
+    <div class="type-of-relation" v-if="store.isAddingRelation">
+      <div class="left-type">
+        <label>Кардинальность начала:</label>
+        <select v-model="store.relationType.first">
+          <option value="1">1</option>
+          <option value="0..1">0..1</option>
+          <option value="M">M</option>
+          <option value="0..M">0..M</option>
+        </select>
+      </div>
+    
+      <div class="right-type">
+        <label>Кардинальность конца:</label>
+        <select v-model="store.relationType.second">
+          <option value="1">1</option>
+          <option value="0..1">0..1</option>
+          <option value="M">M</option>
+          <option value="0..M">0..M</option>
+        </select>
+      </div>
+    </div>
+
     <button class="convert" @click="store.convertToSql(); isModalOpen = true">sql-код</button>
 
-    <ModalWindow :isOpen="isModalOpen" @close="isModalOpen = false">
-      <h2>Заголовок модального окна</h2>
-      <!--<div v-html="store.sqlCode"></div>
-      <p>{{ store.sqlCode }}</p>-->
-    </ModalWindow>
+    <ModalWindow :isOpen="isModalOpen" @close="isModalOpen = false" />
   </div>
 </template>
 
@@ -41,8 +53,8 @@
   const isModalOpen = ref(false)
 
   const store = useDiagramStore()
-  const addElement = (type) => store.addElement(type)
-  
+  const addElement = () => store.addElement()
+  const addCompositeElement = () => store.addCompositeElement()
 </script>
 
 <style lang="scss">
@@ -68,6 +80,9 @@
     background-color: #000000;
     color: #fff;
     padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    justify-content:center
   }
   .ordinary-button:hover{
     background-color: #212020;
@@ -86,4 +101,37 @@
   .convert:hover{
     background-color: #4a124f;
   }
+
+  .type-of-relation {
+  //right: 20px;
+  top: 40px;
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  padding: 12px;
+  border-radius: 8px;
+  width: 200px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.type-of-relation label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.type-of-relation select {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.diamond-shape {
+  width: 40px;
+  height: 40px;
+  background: #aaa;
+  transform: rotate(45deg);
+  margin: auto;
+  margin-top: 10px;
+}
+
+
 </style>
