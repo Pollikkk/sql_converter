@@ -70,7 +70,6 @@
         />
       </template>
   </div>
-  </div>
 </div>
 <!-- Рисуем связи -->
     <svg class="relations">
@@ -89,7 +88,7 @@
         :to-id="relation.to"
       />
     </svg>
-
+  </div>
   </div>
 </template>
 
@@ -131,7 +130,7 @@
 
     const maxX = Math.max(...store.elements.map(e => e.x + 200), 1000) + padding;
     const maxY = Math.max(...store.elements.map(e => e.y + 100), 1000) + padding;
-
+    
     const canvasContent = document.querySelector(".canvas-content");
     if (canvasContent) {
       canvasContent.style.width = maxX + "px";
@@ -248,12 +247,12 @@
 <style scoped>
   .canvas {
     background: #fff;
+    overflow: auto; /* включаем прокрутку */
     width: 100%;
     height: 95vh;
-    overflow: auto; /* включаем прокрутку */
-    position: relative; 
+    overflow: auto;
+    position: relative;
   }
-  
 
   .canvas-content {
     position: relative;
