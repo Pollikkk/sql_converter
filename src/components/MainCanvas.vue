@@ -5,8 +5,8 @@
   </div>
   <SaveSchemaModal v-if="showSaveModal"  @close="showSaveModal = false" />
   <MySchemasModal v-if="showAllSchemasModal" @close="showAllSchemasModal = false" />
-  <div class="canvas" ref="canvasRef" @click="clearSelection" @mousemove="move" @mouseup="drop">
-    <div class="canvas-content">
+  <div class="canvas">
+    <div class="canvas-content" @click="clearSelection" @mousemove="move" @mouseup="drop">
     <div
       v-for="element in store.elements"
       :key="element.id"
@@ -126,37 +126,50 @@
   });
 
   watchEffect(() => {
-  store.relations.forEach(relation => {
-    const fromTable = store.elements.find(t => t.id === relation.from);
-    const toTable = store.elements.find(t => t.id === relation.to);
-    if (!fromTable || !toTable) return;
+    //следим за размерами текущей схемы и расширяем канву
+    const padding = 300; // отступ, чтобы было не впритык
 
-    const fromPK = Array.isArray(fromTable.columns)
-      ? fromTable.columns.find(c => c.isPK)
-      : null;
-    const toPK = Array.isArray(toTable.columns)
-      ? toTable.columns.find(c => c.isPK)
-      : null;
+    const maxX = Math.max(...store.elements.map(e => e.x + 200), 1000) + padding;
+    const maxY = Math.max(...store.elements.map(e => e.y + 100), 1000) + padding;
 
-    if (fromPK && Array.isArray(toTable.columns)) {
-      toTable.columns.forEach(col => {
-        if (col.isFK && col.references?.tableId === fromTable.id) {
-          col.references.columnId = fromPK.id;
-          col.name = `${fromTable.name.toLowerCase()}_${fromPK.name}_fk`;
-        }
-      });
+    const canvasContent = document.querySelector(".canvas-content");
+    if (canvasContent) {
+      canvasContent.style.width = maxX + "px";
+      canvasContent.style.height = maxY + "px";
     }
 
-    if (toPK && Array.isArray(fromTable.columns)) {
-      fromTable.columns.forEach(col => {
-        if (col.isFK && col.references?.tableId === toTable.id) {
-          col.references.columnId = toPK.id;
-          col.name = `${toTable.name.toLowerCase()}_${toPK.name}_fk`;
-        }
-      });
-    }
+    //Следим за добавлением новых связей -> внешних ключей
+    store.relations.forEach(relation => {
+      const fromTable = store.elements.find(t => t.id === relation.from);
+      const toTable = store.elements.find(t => t.id === relation.to);
+      if (!fromTable || !toTable) return;
+
+      const fromPK = Array.isArray(fromTable.columns)
+        ? fromTable.columns.find(c => c.isPK)
+        : null;
+      const toPK = Array.isArray(toTable.columns)
+        ? toTable.columns.find(c => c.isPK)
+        : null;
+
+      if (fromPK && Array.isArray(toTable.columns)) {
+        toTable.columns.forEach(col => {
+          if (col.isFK && col.references?.tableId === fromTable.id) {
+            col.references.columnId = fromPK.id;
+            col.name = `${fromTable.name.toLowerCase()}_${fromPK.name}_fk`;
+          }
+        });
+      }
+
+      if (toPK && Array.isArray(fromTable.columns)) {
+        fromTable.columns.forEach(col => {
+          if (col.isFK && col.references?.tableId === toTable.id) {
+            col.references.columnId = toPK.id;
+            col.name = `${toTable.name.toLowerCase()}_${toPK.name}_fk`;
+          }
+        });
+      }
+    });
   });
-});
 
 
 
@@ -173,10 +186,10 @@
 
   const move = (event) => {
     if (draggingElementId.value === null) return;
-    
+
     const newX = event.clientX - dragOffset.value.x;
     const newY = event.clientY - dragOffset.value.y;
-    
+
     store.updatePosition(draggingElementId.value, newX, newY);
   };
 
@@ -234,17 +247,17 @@
 
 <style scoped>
   .canvas {
-    flex: 1;
-    position: relative;
     background: #fff;
+    width: 100%;
     height: 95vh;
     overflow: auto; /* включаем прокрутку */
+    position: relative; 
   }
+  
 
   .canvas-content {
     position: relative;
-    width: 3000px;   /* можно регулировать */
-    height: 3000px;  /* можно регулировать */
+    transition: width 0.2s, height 0.2s; /* плавное расширение */
   }
 
   .relations {
