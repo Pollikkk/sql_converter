@@ -1,21 +1,3 @@
-<svg  version="1.1"
-     baseProfile="full"
-     xmlns="http://www.w3.org/2000/svg"
-     viewBox="0 0 64 64"
-     width="40" height="40">
-  <g fill="none" stroke="white" stroke-width="1">
-    <!-- Внешняя рамка -->
-  <rect x="4" y="4" width="56" height="56" rx="4" ry="4"/>
-
-  <!-- Верхняя (заголовочная) строка -->
-  <line x1="4" y1="20" x2="60" y2="20" />
-
-  <!-- Горизонтальные линии -->
-  <line x1="4" y1="32" x2="60" y2="32" />
-  <line x1="4" y1="44" x2="60" y2="44" />
-
-  <!-- Вертикальные линии -->
-  <line x1="24" y1="20" x2="24" y2="60" />
-  <line x1="44" y1="20" x2="44" y2="60" />
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-table" viewBox="0 0 16 16">
+  <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm15 2h-4v3h4V4zm0 4h-4v3h4V8zm0 4h-4v3h3a1 1 0 0 0 1-1v-2zm-5 3v-3H6v3h4zm-5 0v-3H1v2a1 1 0 0 0 1 1h3zm-4-4h4V8H1v3zm0-4h4V4H1v3zm5-3v3h4V4H6zm4 4H6v3h4V8z"/>
 </svg>

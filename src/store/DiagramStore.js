@@ -12,7 +12,8 @@ export const useDiagramStore = defineStore("diagram", {
     relationType: {//тип связи, которую строим
       first: "1",
       second: "1"
-    }
+    },
+    activeSubTab: null         // '1to1' | '1to01' | '01to01' | '1toM' | '01toM' | 'MtoM' | null
   }),
   getters: {
     inheritanceRelations(state) {
@@ -25,6 +26,9 @@ export const useDiagramStore = defineStore("diagram", {
     }
   },
   actions: {
+    setactiveSubTab(){
+
+    },
     addElement() {
       const newElement = {
         id: Date.now(),
@@ -344,6 +348,7 @@ export const useDiagramStore = defineStore("diagram", {
       this.isAddingRelation = false;
       this.relationType.first = "";
       this.relationType.second = "";
+      this.activeSubTab = null;
       console.log(this.relations);
       console.log(this.elements);
     },

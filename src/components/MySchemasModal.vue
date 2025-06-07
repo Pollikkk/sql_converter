@@ -1,7 +1,7 @@
 <template> 
 <div class="modal-overlay"> 
     <div class="modal"> 
-        <h2>📂 Мои схемы</h2> 
+        <h2>Мои схемы</h2> 
         <div class="allSchemes">
           <div class="card" v-for="schema in apiStore.schemas" :key="schema._id" @click="openSchema(schema._id)">
             <div class="card-name">{{ schema.name }}</div>

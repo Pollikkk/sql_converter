@@ -48,9 +48,9 @@ export const useDiagramApiStore = defineStore('diagramApi', {
       }
     },
 
-    async updateSchema(id, payload) {
+    async updateSchema(id, upd) {
       try {
-        const res = await axios.patch(`http://localhost:3003/api/schemas/update/${id}`, payload);
+        const res = await axios.patch(`http://localhost:3003/api/schemas/update/${id}`, upd);
         return res.data.schema;
       } catch (err) {
         console.error('Ошибка обновления схемы:', err);

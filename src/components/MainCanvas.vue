@@ -1,7 +1,7 @@
 <template>
   <div class="upperButtons">
-    <button @click="showSaveModal = true">💾</button>
-    <button @click="showAllSchemasModal = true">📂</button>
+    <button @click="showSaveModal = true"><img src="../assets/buttons/save.svg" alt="Icon" width="30px" height="30px" /></button>
+    <button @click="showAllSchemasModal = true"><img src="../assets/buttons/folder.svg" alt="Icon" width="30px" height="30px" /></button>
   </div>
   <SaveSchemaModal v-if="showSaveModal"  @close="showSaveModal = false" />
   <MySchemasModal v-if="showAllSchemasModal" @close="showAllSchemasModal = false" />
@@ -10,6 +10,7 @@
     <div
       v-for="element in store.elements"
       :key="element.id"
+      :data-testid="'element-id'"
       :data-id="element.id"
       class="element"
       :class="{ selected: store.selectedElements.includes(element.id) }"
@@ -27,7 +28,7 @@
     <div>
       <div class="table-header">
         <input v-model="element.name" class="table-title" />
-        <button class="delete-btn" @click.stop="store.removeElement(element.id)">🗑</button>
+        <button class="delete-btn" @click.stop="store.removeElement(element.id)"><img src="../assets/buttons/trash.svg" alt="Icon" width="20px" height="20px" /></button>
       </div>
       <table class="table-content">
         <tr>
@@ -37,7 +38,7 @@
           <th>Type</th>
         </tr>
         <tr v-for="(col, index) in element.columns" :key="index">
-          <button class="delete-column" @click.stop="store.removeColumn(element.id, col.id)">🗑</button>
+          <button class="delete-column" @click.stop="store.removeColumn(element.id, col.id)"><img src="../assets/buttons/trash.svg" alt="Icon" width="15px" height="15px" /></button>
           <span v-if="col.isPK">🔑</span>
           <span v-if="col.isFK">🔗</span>
           <td><input type="checkbox" v-model="col.isPK" /></td>
@@ -281,8 +282,9 @@
 
   .element {
     position: absolute;
-    background: white;
-    border: 2px solid #000;
+    background: rgb(224, 224, 224);
+    /*border: 2px solid #000;*/
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
     padding: 10px;
     border-radius: 5px;
     user-select: none;
@@ -307,24 +309,31 @@
 
   .table-title {
     width: 100%;
-    border: none;
+    border: none; /* Убирает рамку */
     font-weight: bold;
     text-align: center;
+    outline: none;         /* Убирает рамку при фокусе */
+    height: 2.5rem;        /* Увеличивает высоту (можно задать больше) */
+    font-size: 1.1rem;     /* При желании — чуть крупнее текст */
+    padding: 0.5rem 0;     /* Немного вертикальных отступов */
+    background-color: transparent; /* Убирает фон, если не нужен */
   }
-
   .table-content {
     width: 100%;
     border-collapse: collapse;
   }
 
   .table-content td {
-    border: 1px solid black;
+    border: 1px solid #4a124f;
     padding: 5px;
     text-align: center;
+
   }
 
   .table-content th {
-    background-color: #aaaaaa;
+    border: 1px solid #4a124f;
+    background-color: #4a124f;
+    color: #fff;
     padding: 5px;
     text-align: center;
     font-size: small;
@@ -334,21 +343,39 @@
     width: 16px;
     height: 16px;
     cursor: pointer;
+    accent-color: #37133a;
   }
 
   .column-input {
     width: 100%;
     height: 100%;
     border: none;
+    outline: none;             /* убираем фокусную рамку */
     text-align: center;
+    font-size: 1rem;
+    padding: 0;                /* убираем лишние отступы */
+    box-sizing: border-box;   /* гарантирует, что padding не ломает размер */
+    background-color: transparent; /* если нужно без фона */
   }
 
   .type-select {
     width: 100%;
     height: 100%;
     border: none;
-    background: #f5f5f5;
+    outline: none; 
+    background-color: transparent;
     cursor: pointer;
+    padding: 0;               /* убираем лишние внутренние отступы */
+    box-sizing: border-box;  /* учитывает padding внутри размеров */
+    font-size: 1rem;          /* можно подстроить под общий стиль */
+    appearance: none;
+    text-align: center;
+  }
+
+  .type-select option {
+    background-color: #fff;
+    color: #333;
+    padding: 10px; /* может не сработать */
   }
 
   .delete-btn {
@@ -374,8 +401,8 @@
     cursor: pointer;
     opacity: 0;
     border-radius: 5px;
-    padding: 2px 4px;
-    width: 20px;
+    padding: 4px 4px;
+    width: 25px;
     /*margin-left: -30px;*/
     color: #ffff;
     background-color: #000;
@@ -392,7 +419,7 @@
   }
 
   .add-column-button:hover {
-    background-color: #aaaaaa;
+    background-color: #ffffff;
   }
 
   button {

@@ -37,7 +37,7 @@ const getToElementCenter = (id) => {
   const rect = domEl.getBoundingClientRect()
   return {
     x: el.x + rect.width / 2,
-    y: el.y/* + rect.height / 2*/
+    y: el.y
   }
 }
 
