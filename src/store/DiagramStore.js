@@ -65,7 +65,7 @@ export const useDiagramStore = defineStore("diagram", {
 
       const base = reactive({
         id: baseId,
-        type: 'simpleTable',
+        type: 'parentTable',
         name: 'Parent',
         x: 400,
         y: 200,
@@ -133,6 +133,36 @@ export const useDiagramStore = defineStore("diagram", {
       console.log('Relations: '+this.relations);
       console.log('Tables: '+this.elements);
     },
+    addTableToCompositeElement(parentId, x, y){
+      const childId = Date.now();
+      const parent = this.elements.find(e => e.id === parentId);
+      const newChildTable = reactive({
+        id: childId,
+        type: 'simpleTable',
+        name: 'New Child',
+        x: x,
+        y: y+100,
+        columns: reactive([
+          {
+            id: Date.now() + 1,
+            name: 'id',
+            type: 'INT',
+            isPK: true,
+            isFK: true,
+            references: {
+              tableId: parentId,
+              columnId: parent.columns[0].id
+            }
+          }
+        ])
+      });
+      // Добавляем связь
+      this.relations.push(
+        { from: parentId, to: childId, type: 'inheritance' }
+      );
+      this.elements.push(newChildTable);
+
+    },
     removeElement(id) {
       // Удаляем таблицу
       const rel = this.relations.find(r => r.from == id || r.to == id);
@@ -160,7 +190,7 @@ export const useDiagramStore = defineStore("diagram", {
     addColumn(id) {
       const element = this.elements.find(e => e.id === id);
       if (element) {
-        element.columns.push(reactive({ id: Date.now(), isPK: false, name: "new_column", type: "VARCHAR(255)" }));
+        element.columns.push(reactive({ id: Date.now(), isPK: false, name: "new_column", type: "VARCHAR(256)" }));
       }
     },
     removeColumn(elId, colId) {
@@ -248,7 +278,7 @@ export const useDiagramStore = defineStore("diagram", {
       );
       
       if (exists) {
-        console.warn("Такая связь уже существует");
+        alert("Связь между сущностями уже существует");
         this.cancelRelation();
         return;
       }

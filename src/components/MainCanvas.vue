@@ -46,7 +46,7 @@
           <td>
             <select v-model="col.type" class="type-select">
               <option value="INT">INT</option>
-              <option value="VARCHAR(256)">VARCHAR(255)</option>
+              <option value="VARCHAR(256)">VARCHAR(256)</option>
               <option value="TEXT">TEXT</option>
               <option value="BOOLEAN">BOOLEAN</option>
               <option value="DATE">DATE</option>
@@ -56,6 +56,8 @@
         </tr>
       </table>
       <button class="add-column-button" @click.stop="store.addColumn(element.id)">+</button>
+
+      <button class="add-table-button" v-if="element.type == 'parentTable'" @click.stop="store.addTableToCompositeElement(element.id, element.x, element.y)"><img src="../assets/buttons/table_add.svg" alt="Icon" width="30px" height="30px" /></button>
 
       <!-- Anchor-точки -->
       <template v-if="store.isAddingRelation && hoveredTableId === element.id">
@@ -416,9 +418,18 @@
 
   .add-column-button {
     width: 100%;
+    border-radius: 5px;
   }
 
   .add-column-button:hover {
+    background-color: #ffffff;
+  }
+
+  .add-table-button{
+    border-radius: 5px;
+  }
+
+  .add-table-button:hover{
     background-color: #ffffff;
   }
 

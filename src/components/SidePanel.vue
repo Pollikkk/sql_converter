@@ -6,30 +6,28 @@
     <h4>составная</h4>
     <button class="ordinary-button" @click="addCompositeElement()"><img src="../assets/buttons/compositetable.svg" alt="Icon" width="auto" height="auto" /></button>
     <h3>Связи</h3>
-    <!--<button class="ordinary-button" @click="store.isAddingRelation = !store.isAddingRelation;">
-      <img src="../assets/buttons/relation.svg" alt="Icon" width="auto" height="auto" />
-    </button>-->
 
     <div class="container-relation-buttons">
-      <button class="ordinary-button" 
-              :class="{ activeButton: oneToOneClicked }" 
-              :disabled="store.activeSubTab !== null && activeMainTab !== '1-1'"
-              @click="oneToOneClicked=!oneToOneClicked; toggleMainTab('1-1')">
-        <img src="../assets/buttons/relations/relation-one-to-one-filled.svg" alt="Icon" width="auto" height="40px" />
-      </button>
-      <button class="ordinary-button" 
-              :class="{ activeButton: oneToManyClicked }" 
-              :disabled="store.activeSubTab !== null && activeMainTab !== '1-M'"
-              @click="oneToManyClicked=!oneToManyClicked; toggleMainTab('1-M');">
-        <img src="../assets/buttons/relations/relation-one-to-many-filled.svg" alt="Icon" width="auto" height="40px" />
-      </button>
-      <button class="ordinary-button" 
-              :class="{ activeButton: manyToManyClicked }" 
-              :disabled="store.activeSubTab !== null && activeMainTab !== 'M-M'"
-              @click="manyToManyClicked=!manyToManyClicked; toggleMainTab('M-M');">
-        <img src="../assets/buttons/relations/relation-many-to-many-filled.svg" alt="Icon" width="auto" height="40px" />
-      </button>
-    </div>
+    <button class="ordinary-button"
+            :class="{ activeButton: oneToOneClicked }"
+            :disabled="store.activeSubTab !== null && activeMainTab !== '1-1'"
+            @click="handleClick('1-1')">
+      <img src="../assets/buttons/relations/relation-one-to-one-filled.svg" alt="Icon" height="40px" />
+    </button>
+    <button class="ordinary-button"
+            :class="{ activeButton: oneToManyClicked }"
+            :disabled="store.activeSubTab !== null && activeMainTab !== '1-M'"
+            @click="handleClick('1-M')">
+      <img src="../assets/buttons/relations/relation-one-to-many-filled.svg" alt="Icon" height="40px" />
+    </button>
+    <button class="ordinary-button"
+            :class="{ activeButton: manyToManyClicked }"
+            :disabled="store.activeSubTab !== null && activeMainTab !== 'M-M'"
+            @click="handleClick('M-M')">
+      <img src="../assets/buttons/relations/relation-many-to-many-filled.svg" alt="Icon" height="40px" />
+    </button>
+  </div>
+
 
     <!-- Вложенные кнопки -->
     <div class="container-relation-buttons tab" v-if="activeMainTab === '1-1'">
@@ -76,28 +74,6 @@
         <img src="../assets/buttons/relations/relation-many-to-many.svg" alt="Icon" width="auto" height="40px" />
       </button>
     </div>
-    
-    <!--<div class="type-of-relation" v-if="store.isAddingRelation">
-      <div class="left-type">
-        <label>Кардинальность начала:</label>
-        <select v-model="store.relationType.first">
-          <option value="1">1</option>
-          <option value="0..1">0..1</option>
-          <option value="M">M</option>
-          <option value="0..M">0..M</option>
-        </select>
-      </div>
-    
-      <div class="right-type">
-        <label>Кардинальность конца:</label>
-        <select v-model="store.relationType.second">
-          <option value="1">1</option>
-          <option value="0..1">0..1</option>
-          <option value="M">M</option>
-          <option value="0..M">0..M</option>
-        </select>
-      </div>
-    </div>-->
 
     <button class="convert" @click="store.convertToSql(); isModalOpen = true">sql-код</button>
 
@@ -132,9 +108,47 @@
     store.activeSubTab = subType
     //activeMainTab.value = null
   }
+
+  function handleClick(type) {
+    if (type === '1-1') {
+      if (oneToOneClicked.value ) {
+        oneToOneClicked.value  = false;
+        store.cancelRelation();
+      } else {
+        oneToOneClicked.value = true;
+        oneToManyClicked.value  = false;
+        manyToManyClicked.value  = false;
+        toggleMainTab('1-1');
+      }
+    } else if (type === '1-M') {
+      if (oneToManyClicked.value ) {
+        oneToManyClicked.value  = false;
+        store.cancelRelation();
+      } else {
+        oneToOneClicked.value  = false;
+        oneToManyClicked.value  = true;
+        manyToManyClicked.value  = false;
+        toggleMainTab('1-M');
+      }
+    } else if (type === 'M-M') {
+      if (manyToManyClicked.value ) {
+        manyToManyClicked.value  = false;
+        store.cancelRelation();
+      } else {
+        oneToOneClicked.value  = false;
+        oneToManyClicked.value  = false;
+        manyToManyClicked.value  = true;
+        toggleMainTab('M-M');
+      }
+    }
+  }
+
 </script>
 
 <style lang="scss">
+  h4{
+    color: #575757;
+  }
   .side-panel {
     position: relative;
     width: 16%;
