@@ -16,11 +16,10 @@ npm run serve
 
 # Пример:
 - Рисуем схему:
-<img width="1188" height="872" alt="рис1" src="https://github.com/user-attachments/assets/bf1914a1-ba79-4642-ba53-de1a23387bcb" />
+<img width="1081" height="809" alt="Рисунок1" src="https://github.com/user-attachments/assets/6b05ebd8-a267-4787-a943-14121c45b0ac" />
 
 - Получаем код:
-<img width="1487" height="630" alt="рис2" src="https://github.com/user-attachments/assets/5ac8c9ba-3e2b-42ae-abce-027586d94309" />
-
+<img width="1489" height="629" alt="Рисунок2" src="https://github.com/user-attachments/assets/8c4942bc-3a37-49a7-b936-7751128bf009" />
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
