@@ -16,10 +16,10 @@ npm run serve
 
 # Пример:
 - Рисуем схему:
-<img width="624" height="458" alt="image" src="https://github.com/user-attachments/assets/8650eda1-9da4-41c9-a61b-084a815cdfe2" />
-- Получаем код:
- <img width="624" height="264" alt="image" src="https://github.com/user-attachments/assets/0ccc752c-7f7c-490b-b79f-ffb57315c642" />
+<img width="1188" height="872" alt="рис1" src="https://github.com/user-attachments/assets/bf1914a1-ba79-4642-ba53-de1a23387bcb" />
 
+- Получаем код:
+<img width="1487" height="630" alt="рис2" src="https://github.com/user-attachments/assets/5ac8c9ba-3e2b-42ae-abce-027586d94309" />
 
 
 ### Customize configuration
